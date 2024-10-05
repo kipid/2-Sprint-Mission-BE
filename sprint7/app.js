@@ -11,10 +11,8 @@ import {
 	PatchProduct,
 	PatchUser,
 } from './structs.js';
-import * as dotenv from 'dotenv';
 import { assert } from "superstruct";
 
-dotenv.config();
 const prisma = new PrismaClient();
 
 const app = express();
@@ -22,16 +20,16 @@ app.use(express.json());
 app.use(cors());
 
 const HttpStatus = Object.freeze({
-  SUCCESS: 200,
-  CREATED: 201,
-  ACCEPTED: 202,
-  NON_AUTHORITATIVE_INFORMATION: 203,
+	SUCCESS: 200,
+	CREATED: 201,
+	ACCEPTED: 202,
+	NON_AUTHORITATIVE_INFORMATION: 203,
 	NO_CONTENT: 204,
-  BAD_REQUEST: 400,
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  SERVER_ERROR: 500,
+	BAD_REQUEST: 400,
+	UNAUTHORIZED: 401,
+	FORBIDDEN: 403,
+	NOT_FOUND: 404,
+	SERVER_ERROR: 500,
 });
 
 function asyncHandler(handler) {
@@ -117,7 +115,7 @@ app.get("/users/:id", asyncHandler(async (req, res) => {
 	res.send(user);
 }));
 
-app.get("/users/:userId/productComments", asyncHandler(async (req, res) => {
+app.get("/users/:userId/product-comments", asyncHandler(async (req, res) => {
 	const { userId } = req.params;
 	const { cursor, limit = 10, sort = "recent" } = req.query;
 	let orderBy;
@@ -149,7 +147,7 @@ app.get("/users/:userId/productComments", asyncHandler(async (req, res) => {
 	res.send(productComments);
 }));
 
-app.get("/users/:userId/articleComments", asyncHandler(async (req, res) => {
+app.get("/users/:userId/article-comments", asyncHandler(async (req, res) => {
 	const { userId } = req.params;
 	const { cursor, limit = 10, sort = "recent" } = req.query;
 	let orderBy;
@@ -331,7 +329,7 @@ app.get("/products/:id", asyncHandler(async (req, res) => {
 }));
 
 app.delete("/products/:id", asyncHandler(async (req, res) => {
-const { id } = req.params;
+	const { id } = req.params;
 	const product = await prisma.product.delete({
 		where: { id },
 	});
@@ -455,7 +453,7 @@ app.get("/articles", asyncHandler(async (req, res) => {
 		}
 	: {};
 	let orderBy;
-	switch (orderBy) {
+	switch (sort) {
 		case "oldest":
 			orderBy = { createdAt: "asc" };
 			break;
