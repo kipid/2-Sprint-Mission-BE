@@ -76,7 +76,7 @@ app.patch("/users/:id", asyncHandler(async (req, res) => {
 }));
 
 app.get("/users", asyncHandler(async (req, res) => {
-	const { offset = 0, limit = 10, sort = "recent", keyword = "" } = req.query;
+	const { skip = 0, take = 10, sort = "recent", keyword = "" } = req.query;
 	const query = keyword ? {
 		OR: [{
 				email: { contains: keyword }
@@ -101,8 +101,8 @@ app.get("/users", asyncHandler(async (req, res) => {
 	const users = await prisma.user.findMany({
 		where: query,
 		orderBy,
-		skip: parseInt(offset),
-		take: parseInt(limit),
+		skip: parseInt(skip),
+		take: parseInt(take),
 	});
 	res.send({ list: users, totalCount });
 }));
@@ -117,7 +117,7 @@ app.get("/users/:id", asyncHandler(async (req, res) => {
 
 app.get("/users/:userId/product-comments", asyncHandler(async (req, res) => {
 	const { userId } = req.params;
-	const { cursor, limit = 10, sort = "recent" } = req.query;
+	const { cursor, take = 10, sort = "recent" } = req.query;
 	let orderBy;
 	switch (sort) {
 		case "oldest":
@@ -136,7 +136,7 @@ app.get("/users/:userId/product-comments", asyncHandler(async (req, res) => {
 			id: cursor,
 		}: undefined,
 		skip: cursor ? 1 : 0,
-		take: parseInt(limit),
+		take: parseInt(take),
 		select: {
 			id: true,
 			content: true,
@@ -149,7 +149,7 @@ app.get("/users/:userId/product-comments", asyncHandler(async (req, res) => {
 
 app.get("/users/:userId/article-comments", asyncHandler(async (req, res) => {
 	const { userId } = req.params;
-	const { cursor, limit = 10, sort = "recent" } = req.query;
+	const { cursor, take = 10, sort = "recent" } = req.query;
 	let orderBy;
 	switch (sort) {
 		case "oldest":
@@ -168,7 +168,7 @@ app.get("/users/:userId/article-comments", asyncHandler(async (req, res) => {
 			id: cursor,
 		} : undefined,
 		skip: cursor ? 1 : 0,
-		take: parseInt(limit),
+		take: parseInt(take),
 		select: {
 			id: true,
 			content: true,
@@ -442,18 +442,21 @@ app.patch("/articles/:id", asyncHandler(async (req, res) => {
 }));
 
 app.get("/articles", asyncHandler(async (req, res) => {
-	const { offset = 0, limit = 12, sort = "recent", keyword = "" } = req.query;
+	const { skip = 0, take = 12, sort = "recent", keyword = "" } = req.query;
 	const query = keyword ? {
 		OR: [{
-				title: { contains: keyword }
+				title: { contains: keyword, mode: 'insensitive' }
 			},
 			{
-				content: { contains: keyword }
+				content: { contains: keyword, mode: 'insensitive' }
 			}]
 		}
 	: {};
 	let orderBy;
 	switch (sort) {
+		case "favorite":
+			orderBy = { favoriteCount: "desc" };
+			break;
 		case "oldest":
 			orderBy = { createdAt: "asc" };
 			break;
@@ -467,8 +470,15 @@ app.get("/articles", asyncHandler(async (req, res) => {
 	const articles = await prisma.article.findMany({
 		where: query,
 		orderBy,
-		skip: parseInt(offset),
-		take: parseInt(limit),
+		skip: parseInt(skip),
+		take: parseInt(take),
+		include: {
+			author: {
+				select: {
+					nickname: true,
+				},
+			},
+		},
 	});
 	res.send({ list: articles, totalCount });
 }));
@@ -486,11 +496,13 @@ app.get("/articles/:id", asyncHandler(async (req, res) => {
 			},
 			title: true,
 			content: true,
+			favoriteCount: true,
 			createdAt: true,
 			updatedAt: true,
 			articleComments: {
 				orderBy: { createdAt: "desc" },
 				select: {
+					id: true,
 					content: true,
 					commenter: {
 						select: {

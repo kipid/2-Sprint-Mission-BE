@@ -2,7 +2,7 @@ GET http://localhost:3000/articles
 
 ###
 
-GET http://localhost:3000/articles?offset=0&order=newest&keyword=
+GET http://localhost:3000/articles?skip=0&take=3&order=newest&keyword=
 
 ###
 
@@ -14,9 +14,10 @@ POST http://localhost:3000/articles
 Content-Type: application/json
 
 {
-	"title": "LG gram 17인치 팝니다.",
+	"title": "FavoriteCount test",
 	"authorId": "86f32cda-cc20-49e5-a1c8-a69ff98e5ebf",
-	"content": "90만원에 팔아요."
+	"content": "안녕하세요.",
+	"favoriteCount": 100
 }
 
 ###
@@ -25,7 +26,7 @@ PATCH http://localhost:3000/articles/6c378b9a-3fdd-453c-b6a9-6e2fc90666a5
 Content-Type: application/json
 
 {
-	"content": "새로운 설명입니다2."
+	"content": "새로운 설명입니다."
 }
 
 ###
