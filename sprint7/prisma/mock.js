@@ -1187,6 +1187,12 @@ export const PRODUCT_DATA = [
 
 export const USER_DATA = [
   {
+    id: "86f32cda-cc20-49e5-a1c8-a69ff98e5ebf",
+    email: "admin@example.com",
+    nickname: "admin",
+    password: "XXXXXXXX"
+  },
+  {
     email: "A@example.com",
     nickname: "A",
     password: "pre-pass"
