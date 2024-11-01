@@ -1,8 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { PRODUCT_DATA, USER_DATA } from "./mock.js";
-import * as dotenv from 'dotenv';
 
-dotenv.config();
 const prisma = new PrismaClient();
 
 async function main() {
