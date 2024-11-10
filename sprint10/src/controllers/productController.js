@@ -2,12 +2,12 @@ import express from 'express';
 
 import productService from '../services/productService.js';
 import auth from '../middlewares/auth.js';
+import passport from '../config/passport.js';
 
 const productController = express.Router();
 
 productController.post('/',
-  auth.passportAuthenticateSession,
-  // auth.verifySessionLogin,
+  passport.authenticate('access-token', { session: false }),
   async (req, res, next) => {
   const createdProduct = await productService.create(req.body);
   return res.json(createdProduct);
@@ -23,7 +23,7 @@ productController.get('/:id', async (req, res) => {
 // Products
 /////////////////////////////////////////////////////
 
-app.post("/products", async (req, res) => {
+productController.post("/", async (req, res) => {
 	assert(req.body, CreateProduct);
 	const product = await prisma.product.create({
 		data: req.body,
@@ -31,7 +31,7 @@ app.post("/products", async (req, res) => {
 	res.send(product);
 });
 
-app.post("/products/:id/comment", async (req, res) => {
+productController.post("/:id/comment", async (req, res) => {
 	assert(req.body, CreateProductComment);
 	const { id: productId } = req.params;
 	const productComment = await prisma.productComment.create({
@@ -64,7 +64,7 @@ app.post("/products/:id/comment", async (req, res) => {
 	res.send(productComment);
 });
 
-app.patch("/products/:productId/comment/:commentId", async (req, res) => {
+productController.patch("/:productId/comment/:commentId", async (req, res) => {
 	assert(req.body, CreateProductComment);
 	const { productId, commentId } = req.params;
 	const productComment = await prisma.productComment.update({
@@ -99,7 +99,7 @@ app.patch("/products/:productId/comment/:commentId", async (req, res) => {
 	res.send(productComment);
 });
 
-app.delete("/products/:productId/comment/:commentId", async (req, res) => {
+productController.delete("/:productId/comment/:commentId", async (req, res) => {
 	const { commentId } = req.params;
 	const productComment = await prisma.productComment.delete({
 		where: { id: commentId },
@@ -107,7 +107,7 @@ app.delete("/products/:productId/comment/:commentId", async (req, res) => {
 	res.status(HttpStatus.NO_CONTENT).send(productComment);
 });
 
-app.patch("/products/:id", async (req, res) => {
+productController.patch("/:id", async (req, res) => {
 	assert(req.body, PatchProduct);
 	const { id } = req.params;
 	const product = await prisma.product.update({
@@ -117,42 +117,12 @@ app.patch("/products/:id", async (req, res) => {
 	res.send(product);
 });
 
-app.get("/products", async (req, res) => {
-	const { skip = 0, take = 10, sort = "recent", keyword = "" } = req.query;
-	const query = keyword ? {
-		OR: [{
-				name: { contains: keyword }
-			},
-			{
-				description: { contains: keyword }
-			}]
-		}
-	: {};
-	let orderBy;
-	switch (sort) {
-		case "favorite":
-			orderBy = { favoriteCount: "desc" };
-			break;
-		case "oldest":
-			orderBy = { createdAt: "asc" };
-			break;
-		case "recent":
-		default:
-			orderBy = { createdAt: "desc" };
-	}
-	const totalCount = await prisma.product.count({
-		where: query,
-	});
-	const products = await prisma.product.findMany({
-		where: query,
-		orderBy,
-		skip: parseInt(skip),
-		take: parseInt(take),
-	});
-	res.send({ list: products, totalCount });
+productController.get("/", async (req, res) => {
+	const result = await productService.getProducts(req.query);
+	res.send(result);
 });
 
-app.get("/products/:id", async (req, res) => {
+productController.get("/:id", async (req, res) => {
 	const { id } = req.params;
 	const product = await prisma.product.findUniqueOrThrow({
 		where: { id },
@@ -160,7 +130,7 @@ app.get("/products/:id", async (req, res) => {
 	res.send(product);
 });
 
-app.delete("/products/:id", async (req, res) => {
+productController.delete("/:id", async (req, res) => {
 const { id } = req.params;
 	const product = await prisma.product.delete({
 		where: { id },

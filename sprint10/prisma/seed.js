@@ -1,18 +1,37 @@
 import { PrismaClient } from "@prisma/client";
-import { PRODUCT_DATA, USER_DATA } from "./mock.js";
+import { PRODUCT_DATA, USER_DATA, ARTICLE_DATA } from "./mock.js";
+import userService from '../src/services/userService.js';
 
 const prisma = new PrismaClient();
+
+const getRandomInt = (len) => {
+	return Math.floor(Math.random()*len)
+}
 
 async function main() {
 	await prisma.product.deleteMany();
 	await prisma.user.deleteMany();
-	await prisma.user.createMany({
-		data: USER_DATA,
-		skipDuplicates: true,
-	})
-	await prisma.product.createMany({
-		data: PRODUCT_DATA,
-		skipDuplicates: true,
+	for (const user of USER_DATA) {
+		user.encryptedPassword = await userService.hashingPassword(user.password);
+		const { password, ...rest } = user;
+		await prisma.user.create({
+			data: { ...rest }
+		})
+	}
+	const users = await prisma.user.findMany();
+	console.log(users);
+	const usersLength = users.length;
+	PRODUCT_DATA.forEach(async product => {
+		product.ownerId = users[getRandomInt(usersLength)].id;
+		await prisma.product.create({
+			data: { ...product }
+		})
+	});
+	ARTICLE_DATA.forEach(async article => {
+		article.authorId = users[getRandomInt(usersLength)].id;
+		await prisma.article.create({
+			data: { ...article }
+		})
 	})
 }
 

@@ -5,7 +5,7 @@ const accessTokenOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET,
   // issuer: 'enter issuer here',
-  // audience: 'enter audience here',  
+  // audience: 'enter audience here',
 };
 
 const cookieExtractor = function(req) {
@@ -22,7 +22,6 @@ const refreshTokenOptions = {
 }
 
 async function jwtVerify(payload, done) {
-  console.log('J', payload);
   try {
     const user = await userService.getUserById(payload.userId);
     if (!user) {

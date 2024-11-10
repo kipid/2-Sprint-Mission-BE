@@ -5,7 +5,7 @@ import userService from '../../services/userService.js';
 const googleStrategyOptions = {
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: '/auth/google/callback'
+  callbackURL: '/account/auth/google/callback'
 };
 
 async function verify(accessToken, refreshToken, profile, done) {
@@ -21,4 +21,3 @@ async function verify(accessToken, refreshToken, profile, done) {
 const googleStrategy = new GoogleStrategy(googleStrategyOptions, verify);
 
 export default googleStrategy;
-

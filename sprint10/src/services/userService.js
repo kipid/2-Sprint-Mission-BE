@@ -4,7 +4,20 @@ import jwt from 'jsonwebtoken';
 import HttpStatus from "../httpStatus.js";
 
 async function hashingPassword(password) { // 함수 추가
-  return bcrypt.hash(password, 10);
+  return bcrypt.hash(password, 10); // 2^10 번 hash
+}
+
+function createToken(user, type) {
+  const payload = { userId: user.id };
+  const options = {
+    expiresIn: type === 'refresh' ? '1w' : '1h',
+  };
+  return jwt.sign(payload, process.env.JWT_SECRET, options);
+}
+
+function filterSensitiveUserData(user) {
+  const { password, encryptedPassword, refreshToken, ...rest } = user;
+  return rest;
 }
 
 async function createUser(user) {
@@ -18,8 +31,17 @@ async function createUser(user) {
   }
 
   const hashedPassword = await hashingPassword(user.password); // 해싱 과정 추가
-  const createdUser = await userRepository.save({ ...user, encryptedPassword: hashedPassword }); // password 추가
+  const createdUser = await userRepository.save({ ...filterSensitiveUserData(user), encryptedPassword: hashedPassword }); // password 추가
   return filterSensitiveUserData(createdUser);
+}
+
+async function verifyPassword(inputPassword, savedPassword) {
+  const isValid = await bcrypt.compare(inputPassword, savedPassword); // 변경
+  if (!isValid) {
+    const error = new Error('Unauthorized');
+    error.code = 401;
+    throw error;
+  }
 }
 
 async function getUser(email, password) {
@@ -45,30 +67,8 @@ async function getUserById(id) {
   return filterSensitiveUserData(user);
 }
 
-async function verifyPassword(inputPassword, savedPassword) {
-  const isValid = await bcrypt.compare(inputPassword, savedPassword); // 변경
-  if (!isValid) {
-    const error = new Error('Unauthorized');
-    error.code = 401;
-    throw error;
-  }
-}
-
 async function updateUser(id, data) {
   return await userRepository.update(id, data);
-}
-
-function filterSensitiveUserData(user) {
-  const { encryptedPassword, refreshToken, ...rest } = user;
-  return rest;
-}
-
-function createToken(user, type) {
-  const payload = { userId: user.id };
-  const options = {
-    expiresIn: type === 'refresh' ? '2w' : '1h',
-  };
-  return jwt.sign(payload, process.env.JWT_SECRET, options);
 }
 
 async function refreshToken(userId, refreshToken) {
@@ -83,12 +83,13 @@ async function refreshToken(userId, refreshToken) {
   return { accessToken, newRefreshToken };
 }
 
-async function oauthCreateOrUpdate(provider, providerId, email, name) {
-  const user = await userRepository.createOrUpdate(provider, providerId, email, name);
+async function oauthCreateOrUpdate(provider, providerId, email, nickname) {
+  const user = await userRepository.createOrUpdate(provider, providerId, email, nickname);
   return filterSensitiveUserData(user);
 }
 
 export default {
+  hashingPassword,
   createUser,
   getUser,
   createToken,

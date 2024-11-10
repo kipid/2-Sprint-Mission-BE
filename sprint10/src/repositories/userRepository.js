@@ -16,13 +16,9 @@ async function findByEmail(email) {
   });
 }
 
-async function save(user) {
+async function save({ password, ...user }) {
   return prisma.user.create({
-    data: {
-      email: user.email,
-      nickname: user.nickname,
-      encryptedPassword: user.password,
-    },
+    data: { ...user },
   });
 }
 

@@ -1,5 +1,18 @@
 import prisma from "../config/prisma.js";
 
+async function getProducts({ skip, take, orderBy, where }) {
+  const products = await prisma.product.findMany({
+    skip,
+    take,
+    orderBy,
+    where
+  });
+  const totalCount = await prisma.product.count({
+		where,
+	});
+  return { products, totalCount };
+}
+
 async function getById(id) {
   return await prisma.product.findUnique({
     where: {
@@ -19,6 +32,7 @@ async function save(product) {
 }
 
 export default {
+  getProducts,
   getById,
   save,
 };
