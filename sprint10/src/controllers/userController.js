@@ -1,6 +1,6 @@
 import express from 'express';
 import userService from '../services/userService.js';
-import auth from '../middlewares/auth.js';
+// import auth from '../middlewares/auth.js';
 import passport from '../config/passport.js';
 import HttpStatus from '../httpStatus.js';
 
@@ -13,13 +13,14 @@ const setRefreshTokenCookie = (res, refreshToken) => {
     httpOnly: true,
     sameSite: 'none',
     secure: false,
-    domain: 'localhost',
+    // domain: 'localhost',
     path: `/account${RENEW_TOKEN_PATH}`,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
 
-userController.post('/users', async (req, res, next) => {
+userController.post('/users',
+async (req, res, next) => {
   try {
     const user = await userService.createUser(req.body);
 		const accessToken = userService.createToken(user);
@@ -33,7 +34,8 @@ userController.post('/users', async (req, res, next) => {
 });
 
 // 토큰 기반
-userController.post('/login', async (req, res, next) => {
+userController.post('/login',
+async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user = await userService.getUser(email, password);
@@ -52,11 +54,15 @@ userController.get('/auth/google', passport.authenticate('google', { scope: ['pr
 userController.get('/auth/google/callback',
   passport.authenticate('google'),
   (req, res, next) => {
-    const { id } = req.user;
-    const accessToken = userService.createToken(id);
-    const refreshToken = userService.createToken(id, 'refresh');
-    setRefreshTokenCookie(res, refreshToken);
-    return res.json({ accessToken, user: req.user });
+    try {
+      const { id } = req.user;
+      const accessToken = userService.createToken(id);
+      const refreshToken = userService.createToken(id, 'refresh');
+      setRefreshTokenCookie(res, refreshToken);
+      return res.json({ accessToken, user: req.user });
+    } catch (err) {
+      next(err);
+    }
   });
 
 userController.post(RENEW_TOKEN_PATH,
@@ -69,8 +75,8 @@ userController.post(RENEW_TOKEN_PATH,
       await userService.updateUser(userId, { refreshToken: newRefreshToken }); // 추가
       setRefreshTokenCookie(res, newRefreshToken);
       return res.json({ accessToken });
-    } catch (error) {
-      return next(error);
+    } catch (err) {
+      return next(err);
     }
   });
 

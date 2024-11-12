@@ -57,26 +57,15 @@ async function getById(id) {
 			id: true,
 			author: {
 				select: {
+					id: true,
 					nickname: true,
 				}
 			},
 			title: true,
 			content: true,
+			favoriteCount: true,
 			createdAt: true,
 			updatedAt: true,
-			articleComments: {
-				orderBy: { createdAt: "desc" },
-				select: {
-					content: true,
-					commenter: {
-						select: {
-							nickname: true,
-						}
-					},
-					createdAt: true,
-					updatedAt: true,
-				}
-			}
 		}
 	});
 }

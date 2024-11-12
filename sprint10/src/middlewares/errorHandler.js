@@ -1,3 +1,5 @@
+import HttpStatus from "../httpStatus.js";
+
 export default function errorHandler(error, req, res, next) {
   let status = error.code | error.status ?? 500;
   if (status === 0) {

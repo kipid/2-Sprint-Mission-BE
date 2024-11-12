@@ -19,7 +19,8 @@ export const CreateProduct = s.object({
 	price: s.min(s.number(), 0),
 	tags: s.size(s.array(s.string()), 0, 15),
 	images: s.size(s.array(s.string()), 0, 3),
-	favoriteCount: s.min(s.integer(), 0),
+	ownerId: s.integer(),
+	// favoriteCount: s.min(s.integer(), 0),
 });
 export const PatchProduct = s.partial(CreateProduct);
 	// * Product id 는 따로 받아야 함.
