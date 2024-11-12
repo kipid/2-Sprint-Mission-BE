@@ -76,7 +76,13 @@ CREATE UNIQUE INDEX "User_nickname_key" ON "User"("nickname");
 CREATE UNIQUE INDEX "User_providerId_key" ON "User"("providerId");
 
 -- CreateIndex
+CREATE INDEX "ProductComment_productId_createdAt_idx" ON "ProductComment"("productId", "createdAt" DESC);
+
+-- CreateIndex
 CREATE INDEX "ProductComment_commenterId_updatedAt_idx" ON "ProductComment"("commenterId", "updatedAt" DESC);
+
+-- CreateIndex
+CREATE INDEX "ArticleComment_articleId_createdAt_idx" ON "ArticleComment"("articleId", "createdAt" DESC);
 
 -- CreateIndex
 CREATE INDEX "ArticleComment_commenterId_updatedAt_idx" ON "ArticleComment"("commenterId", "updatedAt" DESC);

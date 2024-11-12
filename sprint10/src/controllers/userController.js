@@ -12,9 +12,10 @@ const setRefreshTokenCookie = (res, refreshToken) => {
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     sameSite: 'none',
-    secure: true,
+    secure: false,
+    domain: 'localhost',
     path: `/account${RENEW_TOKEN_PATH}`,
-    maxAge: 7 * 24 * 60 * 60,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
 

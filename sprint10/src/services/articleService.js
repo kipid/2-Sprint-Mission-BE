@@ -40,22 +40,46 @@ async function getArticles({ page = 1, pageSize = 12, sort = "recent", keyword =
 	};
 }
 
-async function createArticle({ data }) {
-	const article = await articleRepository.create({ data });
-	return article;
+async function create(data) {
+	return await articleRepository.create(data);
 }
 
-async function deleteArticle(id) {
+async function updateById(id, data) {
+	return await articleRepository.updateById(id, data);
+}
+
+async function deleteById(id) {
 	return await articleRepository.deleteById(id);
 }
 
-async function findUnique(id) {
-	return await articleRepository.getById(id);
+async function getById(id, userId) {
+	const article = await articleRepository.getById(id);
+	if (!article) {
+		throw new Error("Article not found");
+	}
+	const favorite = await articleRepository.getArticleFavorite(id, userId);
+	try {
+		article.isFavorite = favorite !== null;
+	} catch (err) {
+		article.isFavorite = false;
+	}
+	return article;
+}
+
+async function favorite(articleId, userId) {
+  return await articleRepository.likeArticle(articleId, userId);
+}
+
+async function unfavorite(articleId, userId) {
+  return await articleRepository.unlikeArticle(articleId, userId);
 }
 
 export default {
 	getArticles,
-	createArticle,
-	deleteArticle,
-	findUnique,
+	create,
+	updateById,
+	deleteById,
+	getById,
+	favorite,
+	unfavorite,
 };

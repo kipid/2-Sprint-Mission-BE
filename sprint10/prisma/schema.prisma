@@ -14,24 +14,26 @@ datasource db {
 }
 
 model User {
-  id                Int              @id @default(autoincrement())
-  email             String           @unique
-  nickname          String?          @unique
+  id                Int               @id @default(autoincrement())
+  email             String            @unique
+  nickname          String?           @unique
   image             String?
   encryptedPassword String?
   refreshToken      String?
-  provider          String           @default("local")
-  providerId        String?          @unique
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  provider          String            @default("local")
+  providerId        String?           @unique
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
   product           Product[]
   productComments   ProductComment[]
   articles          Article[]
   articleComments   ArticleComment[]
+  productFavorites  ProductFavorite[]
+  articleFavorites  ArticleFavorite[]
 }
 
 model Product {
-  id              String           @id @default(uuid())
+  id              String            @id @default(uuid())
   name            String
   description     String
   price           Float
@@ -39,21 +41,42 @@ model Product {
   images          String[]
   favoriteCount   Int
   ownerId         Int
-  owner           User             @relation(fields: [ownerId], references: [id])
+  owner           User              @relation(fields: [ownerId], references: [id])
   productComments ProductComment[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  ProductFavorite ProductFavorite[]
+}
+
+model ProductFavorite {
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    Int
+  productId String
+
+  @@id([userId, productId])
 }
 
 model Article {
-  id              String           @id @default(uuid())
+  id              String            @id @default(uuid())
   title           String
+  favoriteCount   Int               @default(0)
   authorId        Int?
-  author          User?            @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author          User?             @relation(fields: [authorId], references: [id], onDelete: SetNull)
   content         String
   articleComments ArticleComment[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  ArticleFavorite ArticleFavorite[]
+}
+
+model ArticleFavorite {
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    Int
+  articleId String
+
+  @@id([userId, articleId])
 }
 
 model ProductComment {
@@ -66,6 +89,7 @@ model ProductComment {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([productId, createdAt(sort: Desc)])
   @@index([commenterId, updatedAt(sort: Desc)])
 }
 
@@ -79,5 +103,6 @@ model ArticleComment {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([articleId, createdAt(sort: Desc)])
   @@index([commenterId, updatedAt(sort: Desc)])
 }

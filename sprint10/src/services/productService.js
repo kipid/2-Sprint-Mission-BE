@@ -40,16 +40,43 @@ async function getProducts({ page = 1, pageSize = 10, sort = "recent", keyword =
   };
 }
 
-async function getById(id) {
-  return await productRepository.getById(id);
+async function getById(id, userId) {
+  const product = await productRepository.getById(id);
+  if (!product) {
+    throw new Error('Product not found');
+  }
+  const favorite = await productRepository.getProductFavorite(id, userId);
+  console.log('Favorite:', favorite);
+  console.log('userId', userId);
+  try {
+    product.isFavorite = favorite !== null;
+  } catch (err) {
+    product.isFavorite = false;
+  }
+  return product;
 }
 
 async function create(product) {
   return await productRepository.save(product);
 }
 
+async function deleteById(id) {
+  return await productRepository.deleteById(id);
+}
+
+async function favorite(productId, userId) {
+  return await productRepository.likeProduct(productId, userId);
+}
+
+async function unfavorite(productId, userId) {
+  return await productRepository.unlikeProduct(productId, userId);
+}
+
 export default {
   getProducts,
   getById,
   create,
+  deleteById,
+  favorite,
+  unfavorite,
 };

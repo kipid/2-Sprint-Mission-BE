@@ -1,5 +1,4 @@
 import express from "express";
-import { Prisma, PrismaClient } from "@prisma/client";
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import userController from "./controllers/userController.js";
@@ -7,8 +6,6 @@ import productController from "./controllers/productController.js";
 import articleController from "./controllers/articleController.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import morgan from "morgan";
-
-const prisma = new PrismaClient();
 
 const app = express();
 app.use(cors());
@@ -22,4 +19,5 @@ app.use('/articles', articleController);
 
 app.use(errorHandler);
 
-app.listen(process.env.PORT || 3000, () => console.log("Server on"));
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Server on port: ${port}`));

@@ -25,8 +25,17 @@ async function getArticles({ skip, take, orderBy, where }) {
 	return { list, totalCount };
 }
 
-async function create({ data }) {
+async function create(data) {
 	return await prisma.article.create({
+		data,
+	});
+}
+
+async function updateById(id, data) {
+	return await prisma.article.update({
+		where: {
+			id,
+		},
 		data,
 	});
 }
@@ -72,8 +81,68 @@ async function getById(id) {
 	});
 }
 
+async function likeArticle(articleId, userId) {
+	return await prisma.$transaction([
+		prisma.articleFavorite.create({
+			data: {
+				articleId,
+				userId,
+			},
+		}),
+		prisma.article.update({
+			where: {
+				id: articleId,
+			},
+			data: {
+				favoriteCount: {
+					increment: 1,
+				},
+			},
+		})
+	]);
+}
+
+async function unlikeArticle(articleId, userId) {
+	return await prisma.$transaction([
+		prisma.articleFavorite.delete({
+			where: {
+				userId_articleId: {
+					userId,
+					articleId,
+				},
+			},
+		}),
+		prisma.article.update({
+			where: {
+				id: articleId,
+			},
+			data: {
+				favoriteCount: {
+					decrement: 1,
+				},
+			},
+		})
+	]);
+}
+
+async function getArticleFavorite(articleId, userId) {
+	return await prisma.articleFavorite.findUnique({
+		where: {
+			userId_articleId: {
+				userId,
+				articleId,
+			},
+		},
+	});
+}
+
 export default {
+	getArticles,
 	create,
+	updateById,
 	deleteById,
 	getById,
+	likeArticle,
+	unlikeArticle,
+	getArticleFavorite,
 };

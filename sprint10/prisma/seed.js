@@ -10,13 +10,16 @@ const getRandomInt = (len) => {
 
 async function main() {
 	await prisma.product.deleteMany();
+	await prisma.article.deleteMany();
 	await prisma.user.deleteMany();
+	let userId = 1;
 	for (const user of USER_DATA) {
 		user.encryptedPassword = await userService.hashingPassword(user.password);
 		const { password, ...rest } = user;
 		await prisma.user.create({
-			data: { ...rest }
-		})
+			data: { ...rest, id: userId }
+		});
+		userId += 1;
 	}
 	const users = await prisma.user.findMany();
 	console.log(users);
