@@ -15,6 +15,8 @@ async function getArticles({ skip, take, orderBy, where }) {
 			},
 			title: true,
 			content: true,
+			images: true,
+			favoriteCount: true,
 			createdAt: true,
 			updatedAt: true,
 		}
@@ -63,6 +65,7 @@ async function getById(id) {
 			},
 			title: true,
 			content: true,
+			images: true,
 			favoriteCount: true,
 			createdAt: true,
 			updatedAt: true,

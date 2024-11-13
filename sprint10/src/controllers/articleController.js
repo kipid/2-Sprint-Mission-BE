@@ -7,19 +7,32 @@ import passport from '../config/passport.js';
 import { CreateArticle, CreateArticleComment } from '../structs.js';
 import HttpStatus from '../httpStatus.js';
 import { assert } from 'superstruct';
+import multer from 'multer';
 
 const articleController = express.Router();
 
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, 'uploads/');
+	},
+	filename: (req, file, cb) => {
+		cb(null, `${Date.now()}-${file.originalname}`);
+	},
+});
+const upload = multer({ storage: storage });
+
 articleController.post("/",
 passport.authenticate('access-token', { session: false }),
+upload.array('images', 3),
 async (req, res, next) => {
 	try {
 		const { id: userId } = req.user;
 		const data = {
 			...req.body,
 			authorId: userId,
+			images: req.files.map((file) => `/uploads/${file.filename}`),
 		};
-		assert(data, CreateArticle);
+		// assert(data, CreateArticle);
 		data.favoriteCount = 0;
 		const article = await articleService.create(data);
 		res.send(article);

@@ -1,13 +1,13 @@
 import express from "express";
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import multer from "multer";
 import userController from "./controllers/userController.js";
 import productController from "./controllers/productController.js";
 import articleController from "./controllers/articleController.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import morgan from "morgan";
-import HttpStatus from "./httpStatus.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 app.use(cors({
@@ -18,24 +18,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('dev'));
 
-const storage = multer.diskStorage({
-	destination: (req, file, cb) => {
-		cb(null, 'uploads/');
-	},
-	filename: (req, file, cb) => {
-		cb(null, `${Date.now()}-${file.originalname}`);
-	},
-});
-const upload = multer({ storage: storage });
-
-app.post('/upload', upload.array('images', 3), (req, res) => {
-	try {
-		res.send({ status: 'success', files: req.files, });
-	} catch (err) {
-		res.status(HttpStatus.BAD_REQUEST).send({ status: 'fail', error: err.message, });
-	}
-});
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/account', userController);
 app.use('/products', productController);
 app.use('/articles', articleController);
