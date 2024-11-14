@@ -99,10 +99,7 @@ async (req, res, next) => {
 	try {
 		assert(req.body, PatchProduct);
 		const { productId } = req.params;
-		const product = await productService.update({
-			where: { productId },
-			data: req.body,
-		});
+		const product = await productService.updateById(productId, req.body);
 		res.send(product);
 	} catch (err) {
 		next(err);

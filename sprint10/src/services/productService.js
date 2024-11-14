@@ -56,6 +56,10 @@ async function getById(id, userId) {
   return product;
 }
 
+async function updateById(id, product) {
+  return await productRepository.updateById(id, product);
+}
+
 async function create(product) {
   return await productRepository.save(product);
 }
@@ -75,6 +79,7 @@ async function unfavorite(productId, userId) {
 export default {
   getProducts,
   getById,
+  updateById,
   create,
   deleteById,
   favorite,

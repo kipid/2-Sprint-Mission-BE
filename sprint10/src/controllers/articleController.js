@@ -63,7 +63,7 @@ async (req, res, next) => {
 		req.body.commenterId = req.user.id;
 		assert(req.body, CreateArticleComment);
 		const { articleId, commentId } = req.params;
-		const articleComment = await articleCommentService.update(commentId, {
+		const articleComment = await articleCommentService.updateById(commentId, {
 				...req.body,
 				articleId,
 			});
@@ -79,9 +79,7 @@ auth.verifyArticleCommentAuth,
 async (req, res, next) => {
 	try {
 		const { commentId } = req.params;
-		const articleComment = await articleCommentService.delete({
-			where: { id: commentId },
-		});
+		const articleComment = await articleCommentService.deleteById(commentId);
 		res.status(HttpStatus.NO_CONTENT).send(articleComment);
 	} catch (err) {
 		next(err);

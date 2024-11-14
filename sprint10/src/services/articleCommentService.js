@@ -15,16 +15,16 @@ async function create(articleId, userId, content) {
 }
 
 async function updateById(id, data) {
-	return await articleCommentRepository.update({
-		where: {
-			id,
-		},
-		data,
-	});
+	return await articleCommentRepository.updateById(id, data);
+}
+
+async function deleteById(id) {
+	return await articleCommentRepository.deleteById(id);
 }
 
 export default {
 	findManyComments,
 	create,
 	updateById,
+	deleteById,
 };

@@ -10,7 +10,7 @@ async function hashingPassword(password) { // 함수 추가
 function createToken(user, type) {
   const payload = { userId: user.id };
   const options = {
-    expiresIn: type === 'refresh' ? '1w' : '1h',
+    expiresIn: type === 'refresh' ? '1w' : '1d',
   };
   return jwt.sign(payload, process.env.JWT_SECRET, options);
 }

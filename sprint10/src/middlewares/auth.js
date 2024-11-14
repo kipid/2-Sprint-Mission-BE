@@ -105,7 +105,7 @@ async function verifyArticleCommentAuth(req, res, next) {
       throw error;
     }
 
-    if (comment.commenterId !== req.user.id) {
+    if (comment.commenter.id !== req.user.id) {
       const error = new Error('Forbidden');
       error.code = 403;
       throw error;

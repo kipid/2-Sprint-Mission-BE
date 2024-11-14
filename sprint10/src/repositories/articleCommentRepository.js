@@ -23,6 +23,26 @@ async function findManyComments(articleId) {
   });
 }
 
+async function getById(id) {
+  return await prisma.articleComment.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      content: true,
+      createdAt: true,
+      updatedAt: true,
+      commenter: {
+        select: {
+          id: true,
+          nickname: true,
+        },
+      },
+    },
+  });
+}
+
 async function create({ data }) {
   return await prisma.articleComment.create({
     data,
@@ -62,8 +82,18 @@ async function updateById(id, data) {
   });
 }
 
+async function deleteById(id) {
+  return await prisma.articleComment.delete({
+    where: {
+      id,
+    },
+  });
+}
+
 export default {
 	findManyComments,
+  getById,
   create,
   updateById,
+  deleteById,
 };

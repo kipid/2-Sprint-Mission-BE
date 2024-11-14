@@ -37,6 +37,17 @@ async function getById(id) {
 	});
 }
 
+async function updateById(id, product) {
+	return await prisma.product.update({
+		where: {
+			id,
+		},
+		data: {
+			...product,
+		},
+	});
+}
+
 async function save(product) {
 	return await prisma.product.create({
 		data: {
@@ -111,6 +122,7 @@ async function getProductFavorite(productId, userId) {
 export default {
 	getProducts,
 	getById,
+	updateById,
 	save,
 	deleteById,
 	likeProduct,
