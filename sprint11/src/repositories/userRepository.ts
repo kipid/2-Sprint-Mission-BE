@@ -1,6 +1,14 @@
 import prisma from '../config/prisma.js';
 
-async function findById(id) {
+export interface IUserRepository {
+  findById(id): Promise<any>;
+  findByEmail(email): Promise<any>;
+  save(user): Promise<any>;
+  update(id, data): Promise<any>;
+  createOrUpdate(provider, providerId, email, nickname): Promise<any>;
+}
+
+async function findById(id: number) {
   return prisma.user.findUnique({
     where: {
       id,
