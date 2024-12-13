@@ -1,46 +1,46 @@
-import * as s from 'superstruct';
 import isEmail from 'is-email';
 import isUuid from 'is-uuid';
+import { array, define, integer, min, number, object, partial, size, string } from '../node_modules/superstruct/dist/index';
 
-const Uuid = s.define('Uuid', (value) => isUuid.v4(value));
-const email = s.define('email', (value) => isEmail(value));
+const Uuid = define('Uuid', (value) => isUuid.v4(value as string));
+const email = define('email', (value) => isEmail(value as string));
 
-export const CreateUser = s.object({
+export const CreateUser = object({
 	email: email,
-	nickname: s.size(s.string(), 1, 20),
-	password: s.string()
+	nickname: size(string(), 1, 20),
+	password: string()
 });
-export const PatchUser = s.partial(CreateUser);
+export const PatchUser = partial(CreateUser);
 	// * User id 는 따로 받아야 함.
 
-export const CreateProduct = s.object({
-	name: s.size(s.string(), 1, 10),
-	description: s.size(s.string(), 10, 100),
-	price: s.min(s.number(), 0),
-	tags: s.size(s.array(s.string()), 0, 15),
-	images: s.size(s.array(s.string()), 0, 3),
-	ownerId: s.integer(),
-	// favoriteCount: s.min(s.integer(), 0),
+export const CreateProduct = object({
+	name: size(string(), 1, 10),
+	description: size(string(), 10, 100),
+	price: min(number(), 0),
+	tags: size(array(string()), 0, 15),
+	images: size(array(string()), 0, 3),
+	ownerId: integer(),
+	// favoriteCount: min(integer(), 0),
 });
-export const PatchProduct = s.partial(CreateProduct);
+export const PatchProduct = partial(CreateProduct);
 	// * Product id 는 따로 받아야 함.
 
-export const CreateArticle = s.object({
-	title: s.size(s.string(), 1, 50),
-	authorId: s.integer(),
-	content: s.size(s.string(), 10, 500),
+export const CreateArticle = object({
+	title: size(string(), 1, 50),
+	authorId: integer(),
+	content: size(string(), 10, 500),
 });
-export const PatchArticle = s.partial(CreateArticle);
+export const PatchArticle = partial(CreateArticle);
 	// * Article id 는 따로 받아야 함.
 
-export const CreateProductComment = s.object({
-	commenterId: s.integer(),
-	content: s.size(s.string(), 1, 255),
+export const CreateProductComment = object({
+	commenterId: integer(),
+	content: size(string(), 1, 255),
 });
 	// * Patch 는 위 데이터에 id 추가.
 
-export const CreateArticleComment = s.object({
-	commenterId: s.integer(),
-	content: s.size(s.string(), 1, 255),
+export const CreateArticleComment = object({
+	commenterId: integer(),
+	content: size(string(), 1, 255),
 });
 	// * Patch 는 위 데이터에 id 추가.

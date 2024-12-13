@@ -1,56 +1,55 @@
+import { User } from '../../node_modules/.prisma/client/index.js';
 import prisma from '../config/prisma.js';
 
 export interface IUserRepository {
-  findById(id): Promise<any>;
-  findByEmail(email): Promise<any>;
-  save(user): Promise<any>;
-  update(id, data): Promise<any>;
-  createOrUpdate(provider, providerId, email, nickname): Promise<any>;
+  findById(id: number): Promise<User | null>;
+  findByEmail(email: string): Promise<User | null>;
+  save(user: User): Promise<User>;
+  update(id: number, data: Partial<User>): Promise<User>;
+  createOrUpdate(provider: string, providerId: string, email: string, nickname?: string): Promise<User>;
 }
 
-async function findById(id: number) {
-  return prisma.user.findUnique({
-    where: {
-      id,
-    },
-  });
+export class UserRepository implements IUserRepository {
+  async findById(id: number) {
+    return prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async findByEmail(email: string) {
+    return prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+  }
+
+  async save(user: User) {
+    return prisma.user.create({
+      data: { ...user },
+    });
+  }
+
+  async update(id: number, data: Partial<User>) {
+    return prisma.user.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+
+  async createOrUpdate(provider: string, providerId: string, email: string, nickname?: string) {
+    return prisma.user.upsert({
+      where: { email },
+      update: { provider, providerId },
+      create: { provider, providerId, email, nickname },
+    });
+  }
 }
 
-async function findByEmail(email) {
-  return await prisma.User.findUnique({
-    where: {
-      email,
-    },
-  });
-}
+const userRepository = new UserRepository();
 
-async function save({ password, ...user }) {
-  return prisma.user.create({
-    data: { ...user },
-  });
-}
-
-async function update(id, data) {
-  return prisma.user.update({
-    where: {
-      id,
-    },
-    data: data,
-  });
-}
-
-async function createOrUpdate(provider, providerId, email, nickname) {
-  return prisma.user.upsert({
-    where: { provider, providerId },
-    update: { email, nickname },
-    create: { provider, providerId, email, nickname },
-  });
-}
-
-export default {
-  findById,
-  findByEmail,
-  save,
-  update,
-  createOrUpdate,
-}
+export default userRepository;

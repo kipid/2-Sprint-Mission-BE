@@ -1,10 +1,10 @@
-import { PrismaClient } from "@prisma/client";
 import { PRODUCT_DATA, USER_DATA, ARTICLE_DATA } from "./mock.js";
 import userService from '../src/services/userService.js';
+import { PrismaClient } from "../node_modules/.prisma/client/index.js";
 
 const prisma = new PrismaClient();
 
-const getRandomInt = (len) => {
+const getRandomInt = (len: number) => {
 	return Math.floor(Math.random()*len)
 }
 
