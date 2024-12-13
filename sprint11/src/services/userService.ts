@@ -85,7 +85,10 @@ async function refreshToken(userId: number, refreshToken: string) {
   return { accessToken, newRefreshToken };
 }
 
-async function oauthCreateOrUpdate(provider: string, providerId: string, email: string, nickname?: string) {
+async function oauthCreateOrUpdate(provider: string, providerId: string, nickname: string, email?: string) {
+  if (!email) {
+    throw new CustomError('Email is required!', HttpStatus.BAD_REQUEST);
+  }
   const user = await userRepository.createOrUpdate(provider, providerId, email, nickname);
   return filterSensitiveUserData(user);
 }

@@ -19,7 +19,7 @@
     "superstruct": "^2.0.2",
     "url": "^0.11.4"
   },
-  "name": "sprint10",
+  "name": "sprint11",
   "version": "1.0.0",
   "main": "index.js",
   "devDependencies": {
@@ -34,7 +34,6 @@
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.16",
     "@types/passport-jwt": "^4.0.1",
-    "@types/superstruct": "^0.5.0",
     "nodemon": "^3.0.1",
     "prisma": "^5.20.0",
     "typescript": "^5.7.2"
