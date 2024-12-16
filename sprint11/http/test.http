@@ -1,1 +1,4 @@
-DELETE http://localhost:3100/articles/f79de2da-265a-4585-9031-9f7553764c4f
+GET http://localhost:3100/uploads/1731471235283-ì¸ì¸ ìë­ì¹ ìì .png
+
+###
+GET http://localhost:3100

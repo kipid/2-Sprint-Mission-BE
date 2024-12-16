@@ -1,6 +1,10 @@
-import { Strategy as GoogleStrategy, Profile, VerifyCallback } from 'passport-google-oauth20';
-
-import userService from '../../services/userService.js';
+import {
+  Profile,
+  Strategy as GoogleStrategy,
+  VerifyCallback,
+} from "passport-google-oauth20";
+import userService from "../../services/userService.ts";
+import process from "node:process";
 
 const googleStrategyOptions: {
   clientID: string;
@@ -10,11 +14,16 @@ const googleStrategyOptions: {
 } = {
   clientID: process.env.GOOGLE_CLIENT_ID as string,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-  callbackURL: '/account/auth/google/callback',
+  callbackURL: "/account/auth/google/callback",
   passReqToCallback: false,
 };
 
-async function verify(accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback) {
+async function verify(
+  _accessToken: string,
+  _refreshToken: string,
+  profile: Profile,
+  done: VerifyCallback,
+) {
   try {
     const user = await userService.oauthCreateOrUpdate(
       profile.provider,

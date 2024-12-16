@@ -1,99 +1,103 @@
-import prisma from "../config/prisma.js";
+import { ArticleComment, Prisma } from "@prisma/client";
+import prisma from "../config/prisma.ts";
 
-async function findManyComments(articleId) {
-  return await prisma.articleComment.findMany({
-    where: {
-      articleId,
+export interface IArticleCommentRepository {
+  findManyComments(articleId: string): Promise<unknown[]>;
+  getById(id: string): Promise<unknown>;
+  create(
+    { data }: {
+      data:
+        & Prisma.Without<
+          Prisma.ArticleCommentCreateInput,
+          Prisma.ArticleCommentUncheckedCreateInput
+        >
+        & Prisma.ArticleCommentUncheckedCreateInput;
     },
-		orderBy: {
-			createdAt: "desc",
-		},
-    select: {
-      id: true,
-      content: true,
-      createdAt: true,
-      updatedAt: true,
-      commenter: {
-        select: {
-          id: true,
-          nickname: true,
+  ): Promise<ArticleComment>;
+  updateById(
+    id: string,
+    data: Partial<ArticleComment>,
+  ): Promise<ArticleComment>;
+  deleteById(id: string): Promise<ArticleComment>;
+}
+
+class ArticleCommentRepository implements IArticleCommentRepository {
+  async findManyComments(articleId: string) {
+    return await prisma.articleComment.findMany({
+      where: {
+        articleId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
+        commenter: {
+          select: {
+            id: true,
+            nickname: true,
+          },
         },
       },
-    },
-  });
-}
+    });
+  }
 
-async function getById(id) {
-  return await prisma.articleComment.findUnique({
-    where: {
-      id,
-    },
-    select: {
-      id: true,
-      content: true,
-      createdAt: true,
-      updatedAt: true,
-      commenter: {
-        select: {
-          id: true,
-          nickname: true,
+  async getById(id: string) {
+    return await prisma.articleComment.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
+        commenter: {
+          select: {
+            id: true,
+            nickname: true,
+          },
         },
       },
+    });
+  }
+
+  async create(
+    { data }: {
+      data:
+        & Prisma.Without<
+          Prisma.ArticleCommentCreateInput,
+          Prisma.ArticleCommentUncheckedCreateInput
+        >
+        & Prisma.ArticleCommentUncheckedCreateInput;
     },
-  });
+  ) {
+    return await prisma.articleComment.create({
+      data,
+    });
+  }
+
+  updateById(id: string, data: Partial<ArticleComment>) {
+    return prisma.articleComment.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+
+  deleteById(id: string) {
+    return prisma.articleComment.delete({
+      where: {
+        id,
+      },
+    });
+  }
 }
 
-async function create({ data }) {
-  return await prisma.articleComment.create({
-    data,
-    select: {
-			id: true,
-			content: true,
-			createdAt: true,
-			updatedAt: true,
-			commenter: {
-				select: {
-          id: true,
-					nickname: true,
-				},
-			},
-		},
-  });
-}
+const articleCommentRepository = new ArticleCommentRepository();
 
-async function updateById(id, data) {
-  return await prisma.articleComment.update({
-    where: {
-      id,
-    },
-    data,
-    select: {
-			id: true,
-			content: true,
-			createdAt: true,
-			updatedAt: true,
-			commenter: {
-				select: {
-          id: true,
-					nickname: true,
-				},
-			},
-    }
-  });
-}
-
-async function deleteById(id) {
-  return await prisma.articleComment.delete({
-    where: {
-      id,
-    },
-  });
-}
-
-export default {
-	findManyComments,
-  getById,
-  create,
-  updateById,
-  deleteById,
-};
+export default articleCommentRepository;

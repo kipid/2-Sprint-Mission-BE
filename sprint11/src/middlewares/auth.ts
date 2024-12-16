@@ -1,68 +1,69 @@
-import userRepository from '../repositories/userRepository.js';
-import { expressjwt } from 'express-jwt';
-import reviewRepository from '../repositories/reviewRepository.js';
-import productCommentRepository from '../repositories/productCommentRepository.js';
-import productRepository from '../repositories/productRepository.js';
-import articleCommentRepository from '../repositories/articleCommentRepository.js';
-import articleRepository from '../repositories/articleRepository.js';
-
-// function throwUnauthorizedError() {
-//   // 인증되지 않은 경우 401 에러를 발생시키는 함수
-//   const error = new Error('Unauthorized');
-//   error.code = 401;
-//   throw error;
-// }
+import { expressjwt } from "express-jwt";
+// import reviewRepository from "../repositories/reviewRepository.ts";
+import productCommentRepository from "../repositories/productCommentRepository.ts";
+import productRepository from "../repositories/productRepository.ts";
+import articleCommentRepository from "../repositories/articleCommentRepository.ts";
+import articleRepository from "../repositories/articleRepository.ts";
+import { Secret } from "jsonwebtoken";
+import { NextFunction, Request, Response } from "express";
+import { CustomError } from "../types/types.ts";
+import HttpStatus from "../httpStatus.ts";
+import { FilteredUser } from "../services/userService.ts";
+import process from "node:process";
 
 const verifyAccessToken = expressjwt({
-  secret: process.env.JWT_SECRET,
-  algorithms: ['HS256'],
-  requestProperty: 'user'
+  secret: process.env.JWT_SECRET as Secret,
+  algorithms: ["HS256"],
+  requestProperty: "user",
 });
 
 const verifyRefreshToken = expressjwt({
-  secret: process.env.JWT_SECRET,
-  algorithms: ['HS256'],
+  secret: process.env.JWT_SECRET as Secret,
+  algorithms: ["HS256"],
   getToken: (req) => req.cookies.refreshToken,
 });
 
-async function verifyReviewAuth(req, res, next) {
-  const { id: reviewId } = req.params;
-  try {
-    const review = await reviewRepository.getById(reviewId);
+// async function verifyReviewAuth(
+//   req: Request,
+//   _res: Response,
+//   next: NextFunction,
+// ) {
+//   const { id: reviewId } = req.params;
+//   try {
+//     const review = await reviewRepository.getById(reviewId);
 
-    if (!review) {
-      const error = new Error('Review not found');
-      error.code = 404;
-      throw error;
-    }
+//     if (!review) {
+//       throw new CustomError("Review not found", HttpStatus.NOT_FOUND);
+//     }
 
-    if (review.authorId !== req.user.id) {
-      const error = new Error('Forbidden');
-      error.code = 403;
-      throw error;
-    }
+//     const { id: userId } = req.user as FilteredUser;
 
-    return next();
-  } catch (error) {
-    return next(error);
-  }
-}
+//     if (review.authorId !== user?.id) {
+//       throw new CustomError("Forbidden", HttpStatus.FORBIDDEN);
+//     }
 
-async function verifyProductCommentAuth(req, res, next) {
+//     return next();
+//   } catch (error) {
+//     return next(error);
+//   }
+// }
+
+async function verifyProductCommentAuth(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) {
   const { commentId } = req.params;
   try {
     const comment = await productCommentRepository.getById(commentId);
 
     if (!comment) {
-      const error = new Error('Product-Comment not found');
-      error.code = 404;
-      throw error;
+      throw new CustomError("Product-Comment not found", HttpStatus.NOT_FOUND);
     }
 
-    if (comment.commenterId !== req.user.id) {
-      const error = new Error('Forbidden');
-      error.code = 403;
-      throw error;
+    const { id: userId } = req.user as FilteredUser;
+    if (comment.commenterId !== userId) {
+      throw new CustomError("Forbidden", HttpStatus.FORBIDDEN);
     }
 
     return next();
@@ -71,21 +72,22 @@ async function verifyProductCommentAuth(req, res, next) {
   }
 }
 
-async function verifyProductAuth(req, res, next) {
+async function verifyProductAuth(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) {
   const { productId } = req.params;
   try {
     const product = await productRepository.getById(productId);
 
     if (!product) {
-      const error = new Error('Product not found');
-      error.code = 404;
-      throw error;
+      throw new CustomError("Product not found", HttpStatus.NOT_FOUND);
     }
 
-    if (product.ownerId !== req.user.id) {
-      const error = new Error('Forbidden');
-      error.code = 403;
-      throw error;
+    const { id: userId } = req.user as FilteredUser;
+    if (product.ownerId !== userId) {
+      throw new CustomError("Forbidden", HttpStatus.FORBIDDEN);
     }
 
     return next();
@@ -94,21 +96,22 @@ async function verifyProductAuth(req, res, next) {
   }
 }
 
-async function verifyArticleCommentAuth(req, res, next) {
+async function verifyArticleCommentAuth(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) {
   const { commentId } = req.params;
   try {
     const comment = await articleCommentRepository.getById(commentId);
 
     if (!comment) {
-      const error = new Error('Article-Comment not found');
-      error.code = 404;
-      throw error;
+      throw new CustomError("Article-Comment not found", HttpStatus.NOT_FOUND);
     }
 
-    if (comment.commenter.id !== req.user.id) {
-      const error = new Error('Forbidden');
-      error.code = 403;
-      throw error;
+    const { id: userId } = req.user as FilteredUser;
+    if (comment.commenter?.id !== userId) {
+      throw new CustomError("Forbidden", HttpStatus.FORBIDDEN);
     }
 
     return next();
@@ -117,21 +120,22 @@ async function verifyArticleCommentAuth(req, res, next) {
   }
 }
 
-async function verifyArticleAuth(req, res, next) {
+async function verifyArticleAuth(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) {
   const { articleId } = req.params;
   try {
     const article = await articleRepository.getById(articleId);
 
     if (!article) {
-      const error = new Error('Article not found');
-      error.code = 404;
-      throw error;
+      throw new CustomError("Article not found", HttpStatus.NOT_FOUND);
     }
 
-    if (article.authorId !== req.user.id) {
-      const error = new Error('Forbidden');
-      error.code = 403;
-      throw error;
+    const { id: userId } = req.user as FilteredUser;
+    if (article.authorId !== userId) {
+      throw new CustomError("Forbidden", HttpStatus.FORBIDDEN);
     }
 
     return next();
@@ -140,7 +144,7 @@ async function verifyArticleAuth(req, res, next) {
   }
 }
 
-// async function verifySessionLogin(req, res, next) {
+// async function verifySessionLogin(req: Request, res: Response, next: NextFunction) {
 //   // 세션에서 사용자 정보를 읽어옴
 //   try {
 //     const { userId } = req.session;
@@ -171,7 +175,7 @@ async function verifyArticleAuth(req, res, next) {
 //   }
 // }
 
-// function passportAuthenticateSession(req, res, next) {
+// function passportAuthenticateSession(req: Request, res: Response, next: NextFunction) {
 //   if (!req.isAuthenticated()) {
 //     return res.status(401).json({ message: 'Unauthorized' });
 //   }
@@ -181,10 +185,9 @@ async function verifyArticleAuth(req, res, next) {
 export default {
   verifyAccessToken,
   verifyRefreshToken,
-  verifyReviewAuth,
+  // verifyReviewAuth,
   verifyProductCommentAuth,
   verifyProductAuth,
   verifyArticleCommentAuth,
   verifyArticleAuth,
-}
-
+};

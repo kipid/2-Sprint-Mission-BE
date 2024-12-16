@@ -1,6 +1,7 @@
-import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import userService, { FilteredUser } from '../../services/userService.js'
-import { Request } from 'express';
+import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt";
+import userService, { FilteredUser } from "../../services/userService.ts";
+import { Request } from "express";
+import process from "node:process";
 
 const accessTokenOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -9,10 +10,10 @@ const accessTokenOptions = {
   // audience: 'enter audience here',
 };
 
-const cookieExtractor = function(req: Request) {
+const cookieExtractor = function (req: Request) {
   let token = null;
   if (req && req.cookies) {
-    token = req.cookies['refreshToken'];
+    token = req.cookies["refreshToken"];
   }
   return token;
 };
@@ -20,16 +21,19 @@ const cookieExtractor = function(req: Request) {
 const refreshTokenOptions = {
   jwtFromRequest: cookieExtractor,
   secretOrKey: process.env.JWT_SECRET as string,
-}
+};
 
-async function jwtVerify(payload: { userId: number }, done: (error: Error | null, user: false | FilteredUser) => any) {
+async function jwtVerify(
+  payload: { userId: number },
+  done: (error: unknown, user: false | FilteredUser) => void,
+) {
   try {
     const user = await userService.getUserById(payload.userId);
     if (!user) {
       return done(null, false);
     }
     return done(null, user);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return done(error, false);
   }
 }
@@ -37,7 +41,4 @@ async function jwtVerify(payload: { userId: number }, done: (error: Error | null
 const accessTokenStrategy = new JwtStrategy(accessTokenOptions, jwtVerify);
 const refreshTokenStrategy = new JwtStrategy(refreshTokenOptions, jwtVerify);
 
-export {
-  accessTokenStrategy,
-  refreshTokenStrategy,
-};
+export { accessTokenStrategy, refreshTokenStrategy };

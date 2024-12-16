@@ -1,16 +1,21 @@
-import { User } from '../../node_modules/.prisma/client/index.js';
-import prisma from '../config/prisma.js';
+import { User } from "@prisma/client";
+import prisma from "../config/prisma.ts";
 
 export interface IUserRepository {
   findById(id: number): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   save(user: User): Promise<User>;
   update(id: number, data: Partial<User>): Promise<User>;
-  createOrUpdate(provider: string, providerId: string, email: string, nickname?: string): Promise<User>;
+  createOrUpdate(
+    provider: string,
+    providerId: string,
+    email: string,
+    nickname?: string,
+  ): Promise<User>;
 }
 
 export class UserRepository implements IUserRepository {
-  async findById(id: number) {
+  findById(id: number) {
     return prisma.user.findUnique({
       where: {
         id,
@@ -18,7 +23,7 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async findByEmail(email: string) {
+  findByEmail(email: string) {
     return prisma.user.findUnique({
       where: {
         email,
@@ -26,13 +31,13 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async save(user: User) {
+  save(user: User) {
     return prisma.user.create({
       data: { ...user },
     });
   }
 
-  async update(id: number, data: Partial<User>) {
+  update(id: number, data: Partial<User>) {
     return prisma.user.update({
       where: {
         id,
@@ -41,7 +46,12 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async createOrUpdate(provider: string, providerId: string, email: string, nickname?: string) {
+  createOrUpdate(
+    provider: string,
+    providerId: string,
+    email: string,
+    nickname?: string,
+  ) {
     return prisma.user.upsert({
       where: { email },
       update: { provider, providerId },

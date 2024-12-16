@@ -1,140 +1,213 @@
-import prisma from "../config/prisma.js";
+import prisma from "../config/prisma.ts";
+import { Article, ArticleFavorite, Prisma } from "@prisma/client";
 
-async function getArticles({ skip, take, orderBy, where }) {
-	const list = await prisma.article.findMany({
-		skip,
-		take,
-		orderBy,
-		where,
-		select: {
-			id: true,
-			author: {
-				select: {
-					nickname: true,
-				}
-			},
-			title: true,
-			content: true,
-			images: true,
-			favoriteCount: true,
-			createdAt: true,
-			updatedAt: true,
-		}
-	});
-	const totalCount = await prisma.article.count({
-		where,
-	});
-	return { list, totalCount };
+export interface IArticleRepository {
+  getArticles: ({ skip, take, orderBy, where }: {
+    skip: number;
+    take: number;
+    orderBy: {
+      [key: string]: "asc" | "desc";
+    };
+    where: {
+      OR: ({
+        title: {
+          contains: string;
+        };
+        content?: undefined;
+      } | {
+        content: {
+          contains: string;
+        };
+        title?: undefined;
+      })[];
+    } | {
+      OR?: undefined;
+    };
+  }) => Promise<{
+    list: unknown[];
+    totalCount: number;
+  }>;
+  create: (
+    data: Prisma.XOR<
+      Prisma.ArticleCreateInput,
+      Prisma.ArticleUncheckedCreateInput
+    >,
+  ) => Promise<Article>;
+  updateById: (id: string, data: Article) => Promise<Article>;
+  deleteById: (id: string) => Promise<Article>;
+  getById: (
+    id: string,
+  ) => Promise<
+    Article & { author: { id: number; nickname: string | null } } | null
+  >;
+  likeArticle: (
+    articleId: string,
+    userId: number,
+  ) => Promise<[ArticleFavorite, Article]>;
+  unlikeArticle: (
+    articleId: string,
+    userId: number,
+  ) => Promise<[ArticleFavorite, Article]>;
+  getArticleFavorite: (
+    articleId: string,
+    userId: number,
+  ) => Promise<ArticleFavorite | null>;
 }
 
-async function create(data) {
-	return await prisma.article.create({
-		data,
-	});
+class ArticleRepository implements IArticleRepository {
+  async getArticles({ skip, take, orderBy, where }: {
+    skip: number;
+    take: number;
+    orderBy: {
+      [key: string]: "asc" | "desc";
+    };
+    where: {
+      OR: ({
+        title: {
+          contains: string;
+        };
+        content?: undefined;
+      } | {
+        content: {
+          contains: string;
+        };
+        title?: undefined;
+      })[];
+    } | {
+      OR?: undefined;
+    };
+  }) {
+    const list = await prisma.article.findMany({
+      skip,
+      take,
+      orderBy,
+      where,
+      select: {
+        id: true,
+        author: {
+          select: {
+            nickname: true,
+          },
+        },
+        title: true,
+        content: true,
+        images: true,
+        favoriteCount: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    const totalCount = await prisma.article.count({
+      where,
+    });
+    return { list, totalCount };
+  }
+
+  create(
+    data: Prisma.XOR<
+      Prisma.ArticleCreateInput,
+      Prisma.ArticleUncheckedCreateInput
+    >,
+  ) {
+    return prisma.article.create({
+      data,
+    });
+  }
+
+  updateById(id: string, data: Partial<Article>) {
+    return prisma.article.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+
+  deleteById(id: string) {
+    return prisma.article.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  getById(
+    id: string,
+  ): Promise<
+    | (Article & { author: { id: number; nickname: string | null } })
+    | null
+  > {
+    return prisma.article.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            nickname: true,
+          },
+        },
+      },
+    });
+  }
+
+  async likeArticle(articleId: string, userId: number) {
+    return await prisma.$transaction([
+      prisma.articleFavorite.create({
+        data: {
+          articleId,
+          userId,
+        },
+      }),
+      prisma.article.update({
+        where: {
+          id: articleId,
+        },
+        data: {
+          favoriteCount: {
+            increment: 1,
+          },
+        },
+      }),
+    ]);
+  }
+
+  async unlikeArticle(articleId: string, userId: number) {
+    return await prisma.$transaction([
+      prisma.articleFavorite.delete({
+        where: {
+          userId_articleId: {
+            userId,
+            articleId,
+          },
+        },
+      }),
+      prisma.article.update({
+        where: {
+          id: articleId,
+        },
+        data: {
+          favoriteCount: {
+            decrement: 1,
+          },
+        },
+      }),
+    ]);
+  }
+
+  getArticleFavorite(articleId: string, userId: number) {
+    return prisma.articleFavorite.findUnique({
+      where: {
+        userId_articleId: {
+          userId,
+          articleId,
+        },
+      },
+    });
+  }
 }
 
-async function updateById(id, data) {
-	return await prisma.article.update({
-		where: {
-			id,
-		},
-		data,
-	});
-}
+const articleRepository = new ArticleRepository();
 
-async function deleteById(id) {
-	return await prisma.article.delete({
-		where: {
-			id,
-		},
-	});
-}
-
-async function getById(id) {
-	return await prisma.article.findUnique({
-		where: {
-			id,
-		},
-		select: {
-			id: true,
-			author: {
-				select: {
-					id: true,
-					nickname: true,
-				}
-			},
-			title: true,
-			content: true,
-			images: true,
-			favoriteCount: true,
-			createdAt: true,
-			updatedAt: true,
-		}
-	});
-}
-
-async function likeArticle(articleId, userId) {
-	return await prisma.$transaction([
-		prisma.articleFavorite.create({
-			data: {
-				articleId,
-				userId,
-			},
-		}),
-		prisma.article.update({
-			where: {
-				id: articleId,
-			},
-			data: {
-				favoriteCount: {
-					increment: 1,
-				},
-			},
-		})
-	]);
-}
-
-async function unlikeArticle(articleId, userId) {
-	return await prisma.$transaction([
-		prisma.articleFavorite.delete({
-			where: {
-				userId_articleId: {
-					userId,
-					articleId,
-				},
-			},
-		}),
-		prisma.article.update({
-			where: {
-				id: articleId,
-			},
-			data: {
-				favoriteCount: {
-					decrement: 1,
-				},
-			},
-		})
-	]);
-}
-
-async function getArticleFavorite(articleId, userId) {
-	return await prisma.articleFavorite.findUnique({
-		where: {
-			userId_articleId: {
-				userId,
-				articleId,
-			},
-		},
-	});
-}
-
-export default {
-	getArticles,
-	create,
-	updateById,
-	deleteById,
-	getById,
-	likeArticle,
-	unlikeArticle,
-	getArticleFavorite,
-};
+export default articleRepository;

@@ -1,30 +1,33 @@
-import articleCommentRepository from '../repositories/articleCommentRepository.js';
+import articleCommentRepository from "../repositories/articleCommentRepository.ts";
 
-async function findManyComments(articleId) {
-	return await articleCommentRepository.findManyComments(articleId);
+async function findManyComments(articleId: string) {
+  return await articleCommentRepository.findManyComments(articleId);
 }
 
-async function create(articleId, userId, content) {
-	return await articleCommentRepository.create({
-		data: {
-			articleId,
-			commenterId: userId,
-			content,
-		},
-	});
+async function create(articleId: string, userId: number, content: string) {
+  return await articleCommentRepository.create({
+    data: {
+      articleId,
+      commenterId: userId,
+      content,
+    },
+  });
 }
 
-async function updateById(id, data) {
-	return await articleCommentRepository.updateById(id, data);
+async function updateById(
+  id: string,
+  data: { content: string; articleId: string },
+) {
+  return await articleCommentRepository.updateById(id, data);
 }
 
-async function deleteById(id) {
-	return await articleCommentRepository.deleteById(id);
+async function deleteById(id: string) {
+  return await articleCommentRepository.deleteById(id);
 }
 
 export default {
-	findManyComments,
-	create,
-	updateById,
-	deleteById,
+  findManyComments,
+  create,
+  updateById,
+  deleteById,
 };

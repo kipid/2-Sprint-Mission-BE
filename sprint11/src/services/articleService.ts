@@ -1,85 +1,97 @@
-import articleRepository from '../repositories/articleRepository.js';
+import { Article, Prisma } from "@prisma/client";
+import articleRepository from "../repositories/articleRepository.ts";
+import { CustomError } from "../types/types.ts";
+import HttpStatus from "../httpStatus.ts";
 
-async function getArticles({ page = 1, pageSize = 12, sort = "recent", keyword = "" }) {
-	page = parseInt(page);
-	pageSize = parseInt(pageSize);
+async function getArticles(
+  { page = 1, pageSize = 12, sort = "recent", keyword = "" }: {
+    page: number;
+    pageSize: number;
+    sort: string;
+    keyword: string;
+  },
+) {
+  if (page < 1) {
+    page = 1;
+  }
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
 
-	if (page < 1) {
-		page = 1;
-	}
-	const skip = (page - 1) * pageSize;
-	const take = pageSize;
+  const query = keyword
+    ? {
+      OR: [{
+        title: { contains: keyword as string },
+      }, {
+        content: { contains: keyword as string },
+      }],
+    }
+    : {};
+  let orderBy;
+  switch (sort) {
+    case "favorite":
+      orderBy = { favoriteCount: "desc" as const };
+      break;
+    case "oldest":
+      orderBy = { createdAt: "asc" as const };
+      break;
+    case "recent":
+    default:
+      orderBy = { createdAt: "desc" as const };
+  }
 
-	const query = keyword ? {
-		OR: [{
-				title: { contains: keyword }
-			},
-			{
-				content: { contains: keyword }
-			}]
-		}
-	: {};
-	let orderBy;
-	switch (sort) {
-		case "favorite":
-			orderBy = { favoriteCount: "desc" };
-			break;
-		case "oldest":
-			orderBy = { createdAt: "asc" };
-			break;
-		case "recent":
-		default:
-			orderBy = { createdAt: "desc" };
-	}
+  const { list, totalCount } = await articleRepository.getArticles({
+    skip,
+    take,
+    orderBy,
+    where: query,
+  });
 
-	const { list, totalCount } = await articleRepository.getArticles({ skip, take, orderBy, where: query });
-
-	return {
-		list,
-		totalCount
-	};
+  return {
+    list,
+    totalCount,
+  };
 }
 
-async function create(data) {
-	return await articleRepository.create(data);
+async function create(
+  data: Prisma.XOR<
+    Prisma.ArticleCreateInput,
+    Prisma.ArticleUncheckedCreateInput
+  >,
+) {
+  return await articleRepository.create(data);
 }
 
-async function updateById(id, data) {
-	return await articleRepository.updateById(id, data);
+async function updateById(id: string, data: Partial<Article>) {
+  return await articleRepository.updateById(id, data);
 }
 
-async function deleteById(id) {
-	return await articleRepository.deleteById(id);
+async function deleteById(id: string) {
+  return await articleRepository.deleteById(id);
 }
 
-async function getById(id, userId) {
-	const article = await articleRepository.getById(id);
-	if (!article) {
-		throw new Error("Article not found");
-	}
-	const favorite = await articleRepository.getArticleFavorite(id, userId);
-	try {
-		article.isFavorite = favorite !== null;
-	} catch (err) {
-		article.isFavorite = false;
-	}
-	return article;
+async function getById(id: string, userId: number) {
+  const article = await articleRepository.getById(id);
+  if (!article) {
+    throw new CustomError("Article not found", HttpStatus.NOT_FOUND);
+  }
+  const favorite = await articleRepository.getArticleFavorite(id, userId);
+  return { ...article, isFavorite: favorite !== null };
 }
 
-async function favorite(articleId, userId) {
+async function favorite(articleId: string, userId: number) {
   return await articleRepository.likeArticle(articleId, userId);
 }
 
-async function unfavorite(articleId, userId) {
+async function unfavorite(articleId: string, userId: number) {
   return await articleRepository.unlikeArticle(articleId, userId);
 }
 
 export default {
-	getArticles,
-	create,
-	updateById,
-	deleteById,
-	getById,
-	favorite,
-	unfavorite,
+  getArticles,
+  create,
+  updateById,
+  deleteById,
+  getById,
+  favorite,
+  unfavorite,
 };

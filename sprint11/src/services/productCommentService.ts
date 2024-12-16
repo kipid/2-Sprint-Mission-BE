@@ -1,16 +1,21 @@
-import productCommentRepository from '../repositories/productCommentRepository.js';
+import { Prisma, ProductComment } from "@prisma/client";
+import productCommentRepository from "../repositories/productCommentRepository.ts";
 
-async function create(data) {
+async function create(
+  data: Prisma.XOR<
+    Prisma.ProductCommentCreateInput,
+    Prisma.ProductCommentUncheckedCreateInput
+  >,
+) {
   try {
     const createdComment = await productCommentRepository.create(data);
-
     return createdComment;
   } catch (error) {
     throw error;
   }
 }
 
-async function findManyComments(productId) {
+async function findManyComments(productId: string) {
   try {
     const comments = await productCommentRepository.findManyComments(productId);
 
@@ -20,9 +25,12 @@ async function findManyComments(productId) {
   }
 }
 
-async function update(commentId, data) {
+async function update(commentId: string, data: Partial<ProductComment>) {
   try {
-    const updatedComment = await productCommentRepository.updateById(commentId, data);
+    const updatedComment = await productCommentRepository.updateById(
+      commentId,
+      data,
+    );
 
     return updatedComment;
   } catch (error) {
@@ -30,7 +38,7 @@ async function update(commentId, data) {
   }
 }
 
-async function deleteById(commentId) {
+async function deleteById(commentId: string) {
   try {
     const deletedComment = await productCommentRepository.deleteById(commentId);
 
@@ -43,6 +51,6 @@ async function deleteById(commentId) {
 export default {
   create,
   findManyComments,
-	update,
-	deleteById,
+  update,
+  deleteById,
 };

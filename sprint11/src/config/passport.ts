@@ -1,8 +1,8 @@
-// import localStrategy from '../middlewares/passport/localStrategy.js';
-// import userRepository from '../repositories/userRepository.js';
 import passport from 'passport';
-import { accessTokenStrategy, refreshTokenStrategy } from '../middlewares/passport/jwtStrategy.js';
-import googleStrategy from '../middlewares/passport/googleStrategy.js';
+// import localStrategy from '../middlewares/passport/localStrategy.ts';
+// import userRepository from '../repositories/userRepository.ts';
+import { accessTokenStrategy, refreshTokenStrategy } from '../middlewares/passport/jwtStrategy.ts';
+import googleStrategy from '../middlewares/passport/googleStrategy.ts';
 
 passport.use(googleStrategy);
 

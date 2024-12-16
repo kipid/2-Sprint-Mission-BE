@@ -1,30 +1,29 @@
-import express, { Response } from 'express';
-import userService, { FilteredUser } from '../services/userService.js';
-// import auth from '../middlewares/auth.js';
-import passport from '../config/passport.js';
-import HttpStatus from '../httpStatus.js';
+import express, { Response } from "express";
+import userService, { FilteredUser } from "../services/userService.ts";
+// import auth from '../middlewares/auth.ts';
+import passport from "../config/passport.ts";
+import HttpStatus from "../httpStatus.ts";
 
-const RENEW_TOKEN_PATH = '/renew-token';
+const RENEW_TOKEN_PATH = "/renew-token";
 
 const userController = express.Router();
 
 const setRefreshTokenCookie = (res: Response, refreshToken: string) => {
-  res.cookie('refreshToken', refreshToken, {
+  res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    sameSite: 'none',
+    sameSite: "none",
     secure: false, // TODO: must be secure!
     // domain: 'localhost',
     path: `/account${RENEW_TOKEN_PATH}`,
-    maxAge: 7 * 24 * 60 * 60,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
 
-userController.post('/users',
-async (req, res, next) => {
+userController.post("/users", async (req, res, next) => {
   try {
     const user = await userService.createUser(req.body);
-		const accessToken = userService.createToken(user.id, 'access');
-    const refreshToken = userService.createToken(user.id, 'refresh');
+    const accessToken = userService.createToken(user.id, "access");
+    const refreshToken = userService.createToken(user.id, "refresh");
     await userService.updateUser(user.id, { refreshToken });
     setRefreshTokenCookie(res, refreshToken);
     res.status(HttpStatus.CREATED).json({ accessToken, user });
@@ -34,13 +33,12 @@ async (req, res, next) => {
 });
 
 // 토큰 기반
-userController.post('/login',
-async (req, res, next) => {
+userController.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user = await userService.getUser(email, password);
-    const accessToken = userService.createToken(user.id, 'access');
-    const refreshToken = userService.createToken(user.id, 'refresh');
+    const accessToken = userService.createToken(user.id, "access");
+    const refreshToken = userService.createToken(user.id, "refresh");
     await userService.updateUser(user.id, { refreshToken });
     setRefreshTokenCookie(res, refreshToken);
     res.json({ accessToken, user }); // filter 된 user 정보
@@ -49,36 +47,46 @@ async (req, res, next) => {
   }
 });
 
-userController.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+userController.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] }),
+);
 
-userController.get('/auth/google/callback',
-  passport.authenticate('google'),
+userController.get(
+  "/auth/google/callback",
+  passport.authenticate("google"),
   (req, res, next) => {
     try {
       const { id: userId } = req.user as FilteredUser;
-      const accessToken = userService.createToken(userId, 'access');
-      const refreshToken = userService.createToken(userId, 'refresh');
+      const accessToken = userService.createToken(userId, "access");
+      const refreshToken = userService.createToken(userId, "refresh");
       setRefreshTokenCookie(res, refreshToken);
       res.json({ accessToken, user: req.user });
     } catch (err) {
       next(err);
     }
-  });
+  },
+);
 
-userController.post(RENEW_TOKEN_PATH,
-  passport.authenticate('refresh-token', { session: false }),
+userController.post(
+  RENEW_TOKEN_PATH,
+  passport.authenticate("refresh-token", { session: false }),
   async (req, res, next) => {
     try {
       const { refreshToken } = req.cookies;
       const { id: userId } = req.user as FilteredUser;
-      const { accessToken, newRefreshToken } = await userService.refreshToken(userId, refreshToken);
+      const { accessToken, newRefreshToken } = await userService.refreshToken(
+        userId,
+        refreshToken,
+      );
       await userService.updateUser(userId, { refreshToken: newRefreshToken }); // 추가
       setRefreshTokenCookie(res, newRefreshToken);
       res.json({ accessToken });
     } catch (err) {
       next(err);
     }
-  });
+  },
+);
 
 // 세션 기반
 // userController.post('/session-login',

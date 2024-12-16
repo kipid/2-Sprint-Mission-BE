@@ -1,10 +1,9 @@
-import { Express } from 'express';
-import { FilteredUser } from '../src/services/userService'
+import { FilteredUser } from "../src/services/userService.ts";
 
 declare global {
-	namespace Express {
-		interface Request {
-			user: FilteredUser;
-		}
-	}
+  namespace Express {
+    interface Request {
+      user?: Express.User | FilteredUser;
+    }
+  }
 }
