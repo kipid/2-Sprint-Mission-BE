@@ -39,6 +39,7 @@ export const CreateArticle = object({
   title: size(string(), 1, 50),
   authorId: integer(),
   content: size(string(), 10, 500),
+	images: size(array(string()), 0, 3),
   favoriteCount: min(integer(), 0),
 });
 export const PatchArticle = partial(CreateArticle);
