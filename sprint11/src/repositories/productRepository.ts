@@ -24,7 +24,7 @@ export interface IProductRepository {
       OR?: undefined;
     };
   }): Promise<{
-    products: unknown[];
+    products: (Product & { owner: { id: number; nickname: string | null; } })[];
     totalCount: number;
   }>;
   getById(
@@ -71,7 +71,7 @@ class ProductRepository implements IProductRepository {
     } | {
       OR?: undefined;
     };
-  }): Promise<{ products: unknown[]; totalCount: number }> {
+  }): Promise<{ products: (Product & { owner: { id: number; nickname: string | null; } })[]; totalCount: number }> {
     const products = await prisma.product.findMany({
       skip,
       take,

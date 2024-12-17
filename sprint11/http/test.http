@@ -2,3 +2,9 @@ GET http://localhost:3100/uploads/1731471235283-ì¸ì¸ ìë­ì¹ 
 
 ###
 GET http://localhost:3100
+
+###
+GET http://localhost:3100/products?page=1&pageSize=10
+
+###
+GET http://localhost:3100/articles?page=1&pageSize=10

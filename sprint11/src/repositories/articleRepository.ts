@@ -24,7 +24,7 @@ export interface IArticleRepository {
       OR?: undefined;
     };
   }) => Promise<{
-    list: unknown[];
+    list: (Article & { author: { id: number; nickname: string | null; } | null })[];
     totalCount: number;
   }>;
   create: (
@@ -38,7 +38,7 @@ export interface IArticleRepository {
   getById: (
     id: string,
   ) => Promise<
-    Article & { author: { id: number; nickname: string | null } } | null
+    (Article & { author: { id: number; nickname: string | null } | null }) | null
   >;
   likeArticle: (
     articleId: string,
@@ -82,19 +82,13 @@ class ArticleRepository implements IArticleRepository {
       take,
       orderBy,
       where,
-      select: {
-        id: true,
+      include: {
         author: {
           select: {
+						id: true,
             nickname: true,
           },
         },
-        title: true,
-        content: true,
-        images: true,
-        favoriteCount: true,
-        createdAt: true,
-        updatedAt: true,
       },
     });
     const totalCount = await prisma.article.count({
@@ -134,7 +128,7 @@ class ArticleRepository implements IArticleRepository {
   getById(
     id: string,
   ): Promise<
-    | (Article & { author: { id: number; nickname: string | null } })
+    | (Article & { author: { id: number; nickname: string | null } | null })
     | null
   > {
     return prisma.article.findUnique({

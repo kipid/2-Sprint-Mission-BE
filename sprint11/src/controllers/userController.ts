@@ -1,11 +1,9 @@
 import express, { Response } from "express";
 import userService, { FilteredUser } from "../services/userService.ts";
-// import auth from '../middlewares/auth.ts';
 import passport from "../config/passport.ts";
 import HttpStatus from "../httpStatus.ts";
 
 const RENEW_TOKEN_PATH = "/renew-token";
-
 const userController = express.Router();
 
 const setRefreshTokenCookie = (res: Response, refreshToken: string) => {

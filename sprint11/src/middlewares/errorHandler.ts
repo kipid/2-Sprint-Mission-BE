@@ -1,6 +1,6 @@
 import { ErrorRequestHandler } from "express";
 import HttpStatus from "../httpStatus.ts";
-import { Prisma } from "../../node_modules/.prisma/client/index.js";
+import { Prisma } from "@prisma/client";
 
 const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
   let status = error?.code | error?.status;
