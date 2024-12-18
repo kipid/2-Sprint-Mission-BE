@@ -1,6 +1,6 @@
-import { PRODUCT_DATA, USER_DATA, ARTICLE_DATA } from "./mock.js";
-import userService from '../src/services/userService.js';
-import { PrismaClient } from "../node_modules/.prisma/client/index.js";
+import { PRODUCT_DATA, USER_DATA, ARTICLE_DATA } from "./mock";
+import userService from '../src/services/userService';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 

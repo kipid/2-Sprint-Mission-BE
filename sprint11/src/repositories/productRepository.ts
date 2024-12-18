@@ -1,4 +1,4 @@
-import prisma from "../config/prisma.ts";
+import prisma from "../config/prisma";
 import { Prisma, Product, ProductFavorite } from "@prisma/client";
 
 export interface IProductRepository {

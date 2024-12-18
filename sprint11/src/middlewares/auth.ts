@@ -1,14 +1,14 @@
 import { expressjwt } from "express-jwt";
-// import reviewRepository from "../repositories/reviewRepository.ts";
-import productCommentRepository from "../repositories/productCommentRepository.ts";
-import productRepository from "../repositories/productRepository.ts";
-import articleCommentRepository from "../repositories/articleCommentRepository.ts";
-import articleRepository from "../repositories/articleRepository.ts";
+// import reviewRepository from "../repositories/reviewRepository";
+import productCommentRepository from "../repositories/productCommentRepository";
+import productRepository from "../repositories/productRepository";
+import articleCommentRepository from "../repositories/articleCommentRepository";
+import articleRepository from "../repositories/articleRepository";
 import { Secret } from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
-import { CustomError } from "../types/types.ts";
-import HttpStatus from "../httpStatus.ts";
-import { FilteredUser } from "../services/userService.ts";
+import { CustomError } from "../types/types";
+import HttpStatus from "../httpStatus";
+import { FilteredUser } from "../services/userService";
 import process from "node:process";
 
 const verifyAccessToken = expressjwt({

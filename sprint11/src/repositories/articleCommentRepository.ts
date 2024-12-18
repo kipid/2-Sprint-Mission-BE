@@ -1,5 +1,5 @@
 import { ArticleComment, Prisma } from "@prisma/client";
-import prisma from "../config/prisma.ts";
+import prisma from "../config/prisma";
 
 export interface IArticleCommentRepository {
   findManyComments(articleId: string): Promise<unknown[]>;

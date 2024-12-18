@@ -1,4 +1,4 @@
-import HttpStatus from "../httpStatus.ts";
+import HttpStatus from "../httpStatus";
 
 // export interface User {
 //   id: number;

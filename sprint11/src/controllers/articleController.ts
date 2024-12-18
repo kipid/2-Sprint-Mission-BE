@@ -1,15 +1,15 @@
 import express from "express";
 
-import articleService from "../services/articleService.ts";
-import articleCommentService from "../services/articleCommentService.ts";
-import auth from "../middlewares/auth.ts";
-import passport from "../config/passport.ts";
-import { CreateArticleComment, PatchArticle } from "../structs.ts";
-import HttpStatus from "../httpStatus.ts";
+import articleService from "../services/articleService";
+import articleCommentService from "../services/articleCommentService";
+import auth from "../middlewares/auth";
+import passport from "../config/passport";
+import { CreateArticleComment, PatchArticle } from "../structs";
+import HttpStatus from "../httpStatus";
 import { assert } from "superstruct";
 import multer from "multer";
-import { FilteredUser } from "../services/userService.ts";
-import { CreateArticle } from "../structs.ts";
+import { FilteredUser } from "../services/userService";
+import { CreateArticle } from "../structs";
 
 const articleController = express.Router();
 

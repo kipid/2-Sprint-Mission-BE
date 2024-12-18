@@ -1,17 +1,17 @@
 import express from "express";
 
-import productService from "../services/productService.ts";
-import productCommentService from "../services/productCommentService.ts";
+import productService from "../services/productService";
+import productCommentService from "../services/productCommentService";
 import {
   CreateProduct,
   CreateProductComment,
   PatchProduct,
-} from "../structs.ts";
+} from "../structs";
 import { assert } from "superstruct";
-import auth from "../middlewares/auth.ts";
-import passport from "../config/passport.ts";
-import HttpStatus from "../httpStatus.ts";
-import { FilteredUser } from "../services/userService.ts";
+import auth from "../middlewares/auth";
+import passport from "../config/passport";
+import HttpStatus from "../httpStatus";
+import { FilteredUser } from "../services/userService";
 
 const productController = express.Router();
 

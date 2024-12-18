@@ -1,4 +1,4 @@
-import articleCommentRepository from "../repositories/articleCommentRepository.ts";
+import articleCommentRepository from "../repositories/articleCommentRepository";
 
 async function findManyComments(articleId: string) {
   return await articleCommentRepository.findManyComments(articleId);

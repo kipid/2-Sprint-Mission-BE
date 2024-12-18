@@ -1,9 +1,9 @@
-import userRepository from "../repositories/userRepository.ts";
+import userRepository from "../repositories/userRepository";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import HttpStatus from "../httpStatus.ts";
+import HttpStatus from "../httpStatus";
 import { User } from "@prisma/client";
-import { CustomError } from "../types/types.ts";
+import { CustomError } from "../types/types";
 import process from "node:process";
 
 function hashingPassword(password: string) { // 함수 추가

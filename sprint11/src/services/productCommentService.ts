@@ -1,5 +1,5 @@
 import { Prisma, ProductComment } from "@prisma/client";
-import productCommentRepository from "../repositories/productCommentRepository.ts";
+import productCommentRepository from "../repositories/productCommentRepository";
 
 async function create(
   data: Prisma.XOR<

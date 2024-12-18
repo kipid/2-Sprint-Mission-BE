@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import prisma from "../config/prisma.ts";
+import prisma from "../config/prisma";
 
 export interface IUserRepository {
   findById(id: number): Promise<User | null>;

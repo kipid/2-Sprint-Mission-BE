@@ -1,91 +1,78 @@
-import express, { Response } from "express";
-import userService, { FilteredUser } from "../services/userService";
-import passport from "../config/passport";
-import HttpStatus from "../httpStatus";
-
-const RENEW_TOKEN_PATH = "/renew-token";
-const userController = express.Router();
-
-const setRefreshTokenCookie = (res: Response, refreshToken: string) => {
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    sameSite: "none",
-    secure: false, // TODO: must be secure!
-    // domain: 'localhost',
-    path: `/account${RENEW_TOKEN_PATH}`,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const userService_1 = __importDefault(require("../services/userService"));
+const passport_1 = __importDefault(require("../config/passport"));
+const httpStatus_1 = __importDefault(require("../httpStatus"));
+const RENEW_TOKEN_PATH = "/renew-token";
+const userController = express_1.default.Router();
+const setRefreshTokenCookie = (res, refreshToken) => {
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: false, // TODO: must be secure!
+        // domain: 'localhost',
+        path: `/account${RENEW_TOKEN_PATH}`,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+};
 userController.post("/users", async (req, res, next) => {
-  try {
-    const user = await userService.createUser(req.body);
-    const accessToken = userService.createToken(user.id, "access");
-    const refreshToken = userService.createToken(user.id, "refresh");
-    await userService.updateUser(user.id, { refreshToken });
-    setRefreshTokenCookie(res, refreshToken);
-    res.status(HttpStatus.CREATED).json({ accessToken, user });
-  } catch (error) {
-    next(error);
-  }
+    try {
+        const user = await userService_1.default.createUser(req.body);
+        const accessToken = userService_1.default.createToken(user.id, "access");
+        const refreshToken = userService_1.default.createToken(user.id, "refresh");
+        await userService_1.default.updateUser(user.id, { refreshToken });
+        setRefreshTokenCookie(res, refreshToken);
+        res.status(httpStatus_1.default.CREATED).json({ accessToken, user });
+    }
+    catch (error) {
+        next(error);
+    }
 });
-
 // 토큰 기반
 userController.post("/login", async (req, res, next) => {
-  const { email, password } = req.body;
-  try {
-    const user = await userService.getUser(email, password);
-    const accessToken = userService.createToken(user.id, "access");
-    const refreshToken = userService.createToken(user.id, "refresh");
-    await userService.updateUser(user.id, { refreshToken });
-    setRefreshTokenCookie(res, refreshToken);
-    res.json({ accessToken, user }); // filter 된 user 정보
-  } catch (error) {
-    next(error);
-  }
+    const { email, password } = req.body;
+    try {
+        const user = await userService_1.default.getUser(email, password);
+        const accessToken = userService_1.default.createToken(user.id, "access");
+        const refreshToken = userService_1.default.createToken(user.id, "refresh");
+        await userService_1.default.updateUser(user.id, { refreshToken });
+        setRefreshTokenCookie(res, refreshToken);
+        res.json({ accessToken, user }); // filter 된 user 정보
+    }
+    catch (error) {
+        next(error);
+    }
 });
-
-userController.get(
-  "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] }),
-);
-
-userController.get(
-  "/auth/google/callback",
-  passport.authenticate("google"),
-  (req, res, next) => {
+userController.get("/auth/google", passport_1.default.authenticate("google", { scope: ["profile", "email"] }));
+userController.get("/auth/google/callback", passport_1.default.authenticate("google"), (req, res, next) => {
     try {
-      const { id: userId } = req.user as FilteredUser;
-      const accessToken = userService.createToken(userId, "access");
-      const refreshToken = userService.createToken(userId, "refresh");
-      setRefreshTokenCookie(res, refreshToken);
-      res.json({ accessToken, user: req.user });
-    } catch (err) {
-      next(err);
+        const { id: userId } = req.user;
+        const accessToken = userService_1.default.createToken(userId, "access");
+        const refreshToken = userService_1.default.createToken(userId, "refresh");
+        setRefreshTokenCookie(res, refreshToken);
+        res.json({ accessToken, user: req.user });
     }
-  },
-);
-
-userController.post(
-  RENEW_TOKEN_PATH,
-  passport.authenticate("refresh-token", { session: false }),
-  async (req, res, next) => {
+    catch (err) {
+        next(err);
+    }
+});
+userController.post(RENEW_TOKEN_PATH, passport_1.default.authenticate("refresh-token", { session: false }), async (req, res, next) => {
     try {
-      const { refreshToken } = req.cookies;
-      const { id: userId } = req.user as FilteredUser;
-      const { accessToken, newRefreshToken } = await userService.refreshToken(
-        userId,
-        refreshToken,
-      );
-      await userService.updateUser(userId, { refreshToken: newRefreshToken }); // 추가
-      setRefreshTokenCookie(res, newRefreshToken);
-      res.json({ accessToken });
-    } catch (err) {
-      next(err);
+        const { refreshToken } = req.cookies;
+        const { id: userId } = req.user;
+        const { accessToken, newRefreshToken } = await userService_1.default.refreshToken(userId, refreshToken);
+        await userService_1.default.updateUser(userId, { refreshToken: newRefreshToken }); // 추가
+        setRefreshTokenCookie(res, newRefreshToken);
+        res.json({ accessToken });
     }
-  },
-);
-
+    catch (err) {
+        next(err);
+    }
+});
 // 세션 기반
 // userController.post('/session-login',
 //   passport.authenticate('local'),
@@ -93,7 +80,6 @@ userController.post(
 //     const user = req.user;
 //     return res.json(user);
 //   });
-
 // userController.post('/token/refresh',
 //   auth.verifyRefreshToken,
 //   async (req, res, next) => {
@@ -113,10 +99,8 @@ userController.post(
 //       return next(error);
 //     }
 //   });
-
 // userController.post('/session-login', async (req, res, next) => {
 //   const { email, password } = req.body
-
 //   try {
 //     const user = await userService.getUser(email, password);
 //     req.session.userId = user.id;
@@ -125,11 +109,9 @@ userController.post(
 //     next(error);
 //   }
 // });
-
 /////////////////////////////////////////////////////
 // Users
 /////////////////////////////////////////////////////
-
 // userController.patch("/users/:id", async (req, res) => {
 // 	assert(req.body, PatchUser);
 // 	const { id } = req.params;
@@ -139,7 +121,6 @@ userController.post(
 // 	});
 // 	res.send(user);
 // });
-
 // userController.get("/users", async (req, res) => {
 // 	const { offset = 0, limit = 10, sort = "recent", keyword = "" } = req.query;
 // 	const query = keyword ? {
@@ -171,7 +152,6 @@ userController.post(
 // 	});
 // 	res.send({ list: users, totalCount });
 // });
-
 // userController.get("/users/:id", async (req, res) => {
 // 	const { id } = req.params;
 // 	const user = await prisma.user.findUniqueOrThrow({
@@ -179,7 +159,6 @@ userController.post(
 // 	});
 // 	res.send(user);
 // });
-
 // userController.get("/users/:userId/productComments", async (req, res) => {
 // 	const { userId } = req.params;
 // 	const { cursor, limit = 10, sort = "recent" } = req.query;
@@ -211,7 +190,6 @@ userController.post(
 // 	});
 // 	res.send(productComments);
 // });
-
 // userController.get("/users/:userId/articleComments", async (req, res) => {
 // 	const { userId } = req.params;
 // 	const { cursor, limit = 10, sort = "recent" } = req.query;
@@ -243,7 +221,6 @@ userController.post(
 // 	});
 // 	res.send(articleComments);
 // });
-
 // userController.delete("/users/:id", async (req, res) => {
 // 	const { id } = req.params;
 // 	const user = await prisma.user.delete({
@@ -251,5 +228,4 @@ userController.post(
 // 	});
 // 	res.status(HttpStatus.NO_CONTENT).send(user);
 // });
-
-export default userController;
+exports.default = userController;

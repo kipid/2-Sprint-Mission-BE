@@ -1,5 +1,5 @@
 import { Prisma, Product } from "@prisma/client";
-import productRepository from "../repositories/productRepository.ts";
+import productRepository from "../repositories/productRepository";
 
 async function getProducts(
   { page = 1, pageSize = 10, sort = "recent", keyword = "" }: {

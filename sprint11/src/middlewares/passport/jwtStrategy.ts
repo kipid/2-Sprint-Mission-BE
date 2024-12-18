@@ -1,5 +1,5 @@
 import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt";
-import userService, { FilteredUser } from "../../services/userService.ts";
+import userService, { FilteredUser } from "../../services/userService";
 import { Request } from "express";
 import process from "node:process";
 

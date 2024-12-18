@@ -1,5 +1,5 @@
 import { Prisma, ProductComment } from "@prisma/client";
-import prisma from "../config/prisma.ts";
+import prisma from "../config/prisma";
 
 export interface IProductCommentRepository {
   create: (

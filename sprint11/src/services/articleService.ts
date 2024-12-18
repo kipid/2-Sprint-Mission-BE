@@ -1,7 +1,7 @@
 import { Article, Prisma } from "@prisma/client";
-import articleRepository from "../repositories/articleRepository.ts";
-import { CustomError } from "../types/types.ts";
-import HttpStatus from "../httpStatus.ts";
+import articleRepository from "../repositories/articleRepository";
+import { CustomError } from "../types/types";
+import HttpStatus from "../httpStatus";
 
 async function getArticles(
   { page = 1, pageSize = 12, sort = "recent", keyword = "" }: {

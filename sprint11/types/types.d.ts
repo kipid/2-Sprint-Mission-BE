@@ -1,4 +1,4 @@
-import { FilteredUser } from "../src/services/userService.ts";
+import { FilteredUser } from "../src/services/userService";
 
 declare global {
   namespace Express {

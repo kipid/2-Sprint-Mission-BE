@@ -3,7 +3,7 @@ import {
   Strategy as GoogleStrategy,
   VerifyCallback,
 } from "passport-google-oauth20";
-import userService from "../../services/userService.ts";
+import userService from "../../services/userService";
 import process from "node:process";
 
 const googleStrategyOptions: {

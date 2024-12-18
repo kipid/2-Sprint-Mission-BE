@@ -1,5 +1,5 @@
 import { ErrorRequestHandler } from "express";
-import HttpStatus from "../httpStatus.ts";
+import HttpStatus from "../httpStatus";
 import { Prisma } from "@prisma/client";
 
 const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
