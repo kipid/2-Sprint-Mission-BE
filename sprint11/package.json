@@ -46,6 +46,6 @@
     "dev": "nodemon --watch src src/app.ts"
   },
   "prisma": {
-    "seed": "node prisma/seed.js"
+    "seed": "node dist/prisma/seed.js"
   }
 }
