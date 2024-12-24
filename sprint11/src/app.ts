@@ -11,7 +11,8 @@ import process from "node:process";
 
 const app = express();
 app.use(cors({
-  origin: "http://localhost:3000", // Front-End 단 주소.
+	origin: "https://2-sprint-mission-fe-six.vercel.app",
+  // origin: "http://localhost:3000", // Front-End 단 주소.
   credentials: true, // 쿠키를 받기 위한 설정.
 }));
 app.use(express.json());
